@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impostazioni — OMAV Suite</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0d14;--surf:#131720;--surf2:#1a2030;--surf3:#1f2638;
+  --border:#252d45;--border2:#2e3860;
+  --accent:#5b9cf6;--green:#2ddb95;--orange:#f5a623;--red:#f0545a;
+  --text:#edf0fa;--text2:#9aa5c8;--text3:#505c80;
+  --mono:'JetBrains Mono',monospace;--cond:'Barlow Condensed',sans-serif;
+  --sidebar-w:220px;--header-h:52px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--cond)}
+
+/* ── HEADER ── */
+header{
+  height:var(--header-h);background:var(--surf);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;
+  position:relative;z-index:100;
+}
+.brand{font-family:var(--cond);font-size:20px;font-weight:800;letter-spacing:.18em;color:var(--accent);display:flex;align-items:baseline;gap:8px}
+.brand small{font-size:9px;font-weight:400;letter-spacing:.3em;color:var(--text3);text-transform:uppercase}
+.h-sep{width:1px;height:26px;background:var(--border);flex-shrink:0}
+.h-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
+.h-back{
+  margin-left:auto;display:flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);cursor:pointer;padding:5px 12px;border-radius:4px;
+  border:1px solid var(--border);background:transparent;transition:all .15s;text-decoration:none;
+}
+.h-back:hover{color:var(--text2);border-color:var(--border2)}
+.h-back svg{width:12px;height:12px;flex-shrink:0}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:calc(100vh - var(--header-h));overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--surf);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.sb-header{
+  padding:16px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0;
+  background:linear-gradient(180deg,var(--surf2),var(--surf));
+}
+.sb-title{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--text3);
+}
+.sb-nav{flex:1;overflow-y:auto;padding:8px 0}
+
+/* Gruppo sidebar */
+.sb-group{margin-bottom:4px}
+.sb-group-label{
+  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--text3);
+  padding:8px 16px 4px;
+}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 16px;cursor:pointer;
+  font-family:var(--cond);font-size:13px;font-weight:600;letter-spacing:.04em;
+  color:var(--text2);transition:all .12s;
+  border-left:2px solid transparent;
+  user-select:none;
+}
+.sb-item:hover{background:var(--surf2);color:var(--text)}
+.sb-item.active{
+  background:rgba(91,156,246,.08);color:var(--accent);
+  border-left-color:var(--accent);
+}
+.sb-item-icon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
+.sb-item-badge{
+  margin-left:auto;font-family:var(--mono);font-size:9px;
+  background:var(--bg);color:var(--text3);
+  padding:1px 6px;border-radius:8px;border:1px solid var(--border);
+}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* Sezione header */
+.section-header{
+  padding:20px 28px 16px;border-bottom:1px solid var(--border);flex-shrink:0;
+  background:linear-gradient(90deg,var(--surf2),var(--surf));
+}
+.section-title{
+  font-family:var(--cond);font-size:22px;font-weight:700;letter-spacing:.08em;
+  color:var(--text);margin-bottom:3px;
+}
+.section-desc{
+  font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.6;
+}
+
+/* Content area */
+.section-body{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+
+/* No-db banner */
+.no-db-banner{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;padding:60px 40px;text-align:center;
+  background:var(--surf);border:1px solid var(--border);border-radius:8px;
+}
+.no-db-icon{font-size:36px;opacity:.2}
+.no-db-text{font-family:var(--mono);font-size:11px;color:var(--text3);line-height:1.8}
+.no-db-btn{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;padding:8px 20px;border-radius:4px;cursor:pointer;
+  background:rgba(91,156,246,.12);color:var(--accent);
+  border:1px solid rgba(91,156,246,.35);transition:all .15s;
+}
+.no-db-btn:hover{background:rgba(91,156,246,.22)}
+
+/* ── CARD ── */
+.card{
+  background:var(--surf);border:1px solid var(--border);border-radius:8px;overflow:hidden;
+}
+.card-head{
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(90deg,var(--surf2),var(--surf));
+}
+.card-head-icon{font-size:14px}
+.card-head-title{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--text2);flex:1;
+}
+.card-head-badge{
+  font-family:var(--mono);font-size:9px;color:var(--text3);
+  background:var(--bg);padding:2px 8px;border-radius:8px;border:1px solid var(--border);
+}
+.card-body{padding:16px}
+
+/* ── FORM INPUTS ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:8px}
+.form-row-single{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.8px;color:var(--text3);
+}
+.form-input{
+  background:var(--bg);border:1px solid var(--border);border-radius:3px;
+  color:var(--text);font-family:var(--mono);font-size:12px;
+  padding:7px 10px;outline:none;width:100%;transition:border-color .15s;
+}
+.form-input:focus{border-color:var(--accent)}
+
+/* ── BUTTONS ── */
+.btn{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:7px 16px;border-radius:3px;cursor:pointer;
+  border:1px solid var(--border);background:transparent;color:var(--text3);
+  transition:all .15s;white-space:nowrap;
+}
+.btn:hover{color:var(--text2);border-color:var(--border2)}
+.btn.add{background:rgba(45,219,149,.1);color:var(--green);border-color:rgba(45,219,149,.3)}
+.btn.add:hover{background:rgba(45,219,149,.2)}
+.btn.danger{background:rgba(240,84,90,.08);color:var(--red);border-color:rgba(240,84,90,.3)}
+.btn.danger:hover{background:rgba(240,84,90,.15)}
+.btn.save{background:rgba(91,156,246,.12);color:var(--accent);border-color:rgba(91,156,246,.35)}
+.btn.save:hover{background:rgba(91,156,246,.22)}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── LISTA PERIODI / GIORNI ── */
+.items-list{display:flex;flex-direction:column;gap:5px;margin-top:14px}
+.item-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;
+  background:var(--bg);border:1px solid var(--border);border-radius:4px;
+  transition:border-color .12s;
+}
+.item-row:hover{border-color:var(--border2)}
+.item-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.item-dot.green{background:var(--green);box-shadow:0 0 5px var(--green)}
+.item-dot.orange{background:var(--orange);box-shadow:0 0 5px var(--orange)}
+.item-label{font-family:var(--mono);font-size:11px;color:var(--text);flex:1}
+.item-sub{font-family:var(--mono);font-size:9px;color:var(--text3)}
+.item-del{
+  background:none;border:1px solid transparent;border-radius:3px;
+  color:var(--text3);font-size:13px;cursor:pointer;padding:2px 5px;
+  transition:all .12s;line-height:1;
+}
+.item-del:hover{border-color:rgba(240,84,90,.4);color:var(--red);background:rgba(240,84,90,.08)}
+.items-empty{
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  padding:12px 0;text-align:center;
+}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:4px 0 12px}
+
+/* ── CARD FOOTER ── */
+.card-footer{
+  padding:10px 16px;border-top:1px solid var(--border);
+  display:flex;justify-content:flex-end;
+  background:var(--surf2);
+}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:20px;right:20px;z-index:9999;
+  font-family:var(--mono);font-size:11px;padding:10px 16px;
+  border-radius:5px;background:var(--surf2);
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+  transition:opacity .3s;pointer-events:none;
+}
+
+/* ── PLACEHOLDER SEZIONE ── */
+.placeholder{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:60px 40px;color:var(--text3);text-align:center;
+  flex:1;
+}
+.placeholder-icon{font-size:36px;opacity:.15}
+.placeholder-text{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;line-height:1.8}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── PERCORSI ── */
+.path-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:8px;
+  overflow:hidden;transition:border-color .2s;
+}
+.path-card.connected{border-color:rgba(45,219,149,.25)}
+.path-card.missing{border-color:rgba(240,84,90,.2)}
+.path-card-head{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  background:linear-gradient(90deg,var(--surf2),var(--surf));
+}
+.path-card-icon{font-size:18px;flex-shrink:0}
+.path-card-info{flex:1;min-width:0}
+.path-card-title{
+  font-family:var(--cond);font-size:15px;font-weight:700;letter-spacing:.06em;color:var(--text);
+}
+.path-card-subtitle{
+  font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:.06em;
+}
+.path-status-pill{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0;
+}
+.path-status-pill.ok{background:rgba(45,219,149,.1);color:var(--green);border:1px solid rgba(45,219,149,.3)}
+.path-status-pill.err{background:rgba(240,84,90,.08);color:var(--red);border:1px solid rgba(240,84,90,.25)}
+.path-status-pill.warn{background:rgba(245,166,35,.08);color:var(--orange);border:1px solid rgba(245,166,35,.25)}
+.path-status-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.path-card-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.path-folder-name{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg);border:1px solid var(--border2);border-radius:4px;
+  padding:9px 14px;font-family:var(--mono);font-size:12px;color:var(--text2);
+  min-height:38px;
+}
+.path-folder-name .pf-icon{font-size:14px;flex-shrink:0}
+.path-folder-name .pf-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.path-folder-name .pf-empty{color:var(--text3);font-style:italic;font-size:11px}
+.path-json-chips{display:flex;flex-wrap:wrap;gap:6px}
+.json-chip{
+  display:flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;
+  padding:3px 9px;border-radius:4px;
+}
+.json-chip.found{background:rgba(45,219,149,.08);color:var(--green);border:1px solid rgba(45,219,149,.2)}
+.json-chip.notfound{background:rgba(240,84,90,.06);color:rgba(240,84,90,.6);border:1px solid rgba(240,84,90,.15)}
+.json-chip.na{background:rgba(80,92,128,.1);color:var(--text3);border:1px solid var(--border)}
+.path-actions{display:flex;gap:8px;flex-wrap:wrap}
+.path-btn{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:6px 14px;border-radius:3px;cursor:pointer;
+  border:1px solid var(--border);background:transparent;color:var(--text3);
+  transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px;
+}
+.path-btn:hover{color:var(--text2);border-color:var(--border2)}
+.path-btn.primary{background:rgba(91,156,246,.1);color:var(--accent);border-color:rgba(91,156,246,.3)}
+.path-btn.primary:hover{background:rgba(91,156,246,.2)}
+.path-btn.unlink{background:rgba(240,84,90,.06);color:rgba(240,84,90,.7);border-color:rgba(240,84,90,.2)}
+.path-btn.unlink:hover{background:rgba(240,84,90,.12);color:var(--red)}
+
+/* ── MACCHINE ── */
+.ml-toolbar{
+  display:flex;align-items:center;gap:8px;padding:14px 18px;
+  border-bottom:1px solid var(--border);background:var(--surf);flex-shrink:0;
+}
+.ml-search{
+  flex:1;background:var(--bg);border:1px solid var(--border);border-radius:4px;
+  color:var(--text);font-family:var(--mono);font-size:12px;
+  padding:7px 12px;outline:none;transition:border-color .15s;
+}
+.ml-search:focus{border-color:var(--accent)}
+.ml-search::placeholder{color:var(--text3)}
+.ml-load-btn{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:7px 14px;border-radius:4px;cursor:pointer;
+  background:rgba(91,156,246,.1);color:var(--accent);
+  border:1px solid rgba(91,156,246,.35);transition:all .15s;
+  white-space:nowrap;position:relative;overflow:hidden;
+}
+.ml-load-btn:hover{background:rgba(91,156,246,.2)}
+.ml-load-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.ml-count-pill{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;
+  padding:4px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0;
+  background:rgba(91,156,246,.08);color:var(--accent);border:1px solid rgba(91,156,246,.2);
+}
+.ml-table-wrap{flex:1;overflow-y:auto}
+.ml-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ml-table th{
+  position:sticky;top:0;z-index:2;background:var(--surf2);
+  padding:8px 14px;text-align:left;font-size:9px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--text3);
+  border-bottom:1px solid var(--border2);white-space:nowrap;
+}
+.ml-table td{
+  padding:7px 14px;border-bottom:1px solid var(--border);color:var(--text2);
+  vertical-align:middle;
+}
+.ml-table tr:hover td{background:rgba(255,255,255,.02)}
+.ml-code{color:var(--accent);font-weight:500}
+.ml-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;padding:60px 20px;color:var(--text3);
+  font-family:var(--mono);font-size:11px;text-align:center;
+}
+.ml-footer{
+  padding:8px 18px;border-top:1px solid var(--border);
+  font-family:var(--mono);font-size:10px;color:var(--text3);
+  background:var(--surf);flex-shrink:0;display:flex;align-items:center;gap:10px;
+}
+.ml-footer-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+.ml-no-db{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;flex:1;padding:60px 40px;text-align:center;
+}
+.ml-no-db-icon{font-size:36px;opacity:.15}
+.ml-no-db-text{font-family:var(--mono);font-size:11px;color:var(--text3);line-height:1.8}
+
+/* ── RUBRICA ── */
+.rub-layout{display:flex;flex:1;overflow:hidden;min-height:0}
+.rub-list{width:260px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--surf2);display:flex;flex-direction:column}
+.rub-item{padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;user-select:none;border-left:3px solid transparent}
+.rub-item:hover{background:rgba(91,156,246,.07)}
+.rub-item.active{background:rgba(91,156,246,.12);border-left-color:var(--accent)}
+.rub-item-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;font-family:var(--cond);letter-spacing:.02em}
+.rub-item-email{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.rub-detail{flex:1;overflow-y:auto;padding:28px 32px;display:flex;flex-direction:column;background:var(--bg)}
+.rub-detail-empty{font-family:var(--mono);font-size:12px;color:var(--text3);padding:60px 40px;text-align:center}
+.rub-detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px}
+.rub-detail-avatar{width:56px;height:56px;border-radius:50%;background:rgba(91,156,246,.15);border:2px solid rgba(91,156,246,.3);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--accent);font-family:var(--mono);flex-shrink:0}
+.rub-detail-title{flex:1}
+.rub-detail-fullname{font-size:18px;font-weight:700;color:var(--text);margin-bottom:3px}
+.rub-detail-sub{font-family:var(--mono);font-size:11px;color:var(--text2)}
+.rub-detail-actions{display:flex;gap:8px;flex-shrink:0}
+.rub-field{display:flex;flex-direction:column;gap:5px;padding:14px 0;border-bottom:1px solid var(--border)}
+.rub-field:last-of-type{border-bottom:none}
+.rub-field-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text3)}
+.rub-field-value{font-size:13px;color:var(--text)}
+.rub-field-value.mono{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.rub-field input,.rub-field select{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--cond);font-size:13px;padding:4px 0;outline:none;width:100%;transition:border-color .15s}
+.rub-field input:focus,.rub-field select:focus{border-bottom-color:var(--accent)}
+.rub-field input.mono{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.rub-new-btn{margin:12px 14px;padding:8px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.5px;background:var(--orange);border:none;border-radius:5px;color:#000;cursor:pointer;transition:background .15s;flex-shrink:0}
+.rub-new-btn:hover{background:#d4911a}
+.rub-btn{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 14px;border-radius:3px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text3);transition:all .15s}
+.rub-btn:hover{color:var(--text2);border-color:var(--border2)}
+.rub-btn.save{background:rgba(45,219,149,.1);color:var(--green);border-color:rgba(45,219,149,.3)}
+.rub-btn.danger{background:rgba(240,84,90,.08);color:var(--red);border-color:rgba(240,84,90,.3)}
+.rub-no-db{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;flex:1;padding:60px 40px;text-align:center}
+.rub-no-db-icon{font-size:36px;opacity:.15}
+.rub-no-db-text{font-family:var(--mono);font-size:11px;color:var(--text3);line-height:1.8}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">OMAV <small>SMS Group</small></div>
+  <div class="h-sep"></div>
+  <div class="h-label">Impostazioni</div>
+  <a class="h-back" href="Index.html">
+    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M8 2L4 6l4 4"/>
+    </svg>
+    Torna alla Suite
+  </a>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-header">
+      <div class="sb-title">⚙ Impostazioni Suite</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-group">
+        <div class="sb-group-label">Calendario</div>
+        <div class="sb-item active" data-section="ferie" onclick="showSection('ferie',this)">
+          <span class="sb-item-icon">🏖</span>
+          Ferie
+          <span class="sb-item-badge" id="badgeFerie">—</span>
+        </div>
+        <div class="sb-item" data-section="festivita" onclick="showSection('festivita',this)">
+          <span class="sb-item-icon">📅</span>
+          Festività
+          <span class="sb-item-badge" id="badgeFestivita">—</span>
+        </div>
+      </div>
+      <div class="sb-group">
+        <div class="sb-group-label">Sistema</div>
+        <div class="sb-item" data-section="percorsi" onclick="showSection('percorsi',this)">
+          <span class="sb-item-icon">📂</span>
+          Percorsi
+        </div>
+        <div class="sb-item" data-section="macchine" onclick="showSection('macchine',this)">
+          <span class="sb-item-icon">🔧</span>
+          Macchine
+          <span class="sb-item-badge" id="badgeMacchine">—</span>
+        </div>
+        <div class="sb-item" data-section="rubrica" onclick="showSection('rubrica',this)">
+          <span class="sb-item-icon">👥</span>
+          Rubrica
+          <span class="sb-item-badge" id="badgeRubrica">—</span>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainArea">
+
+    <!-- SEZIONE: FERIE -->
+    <div id="section-ferie" class="section-content" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+      <div class="section-header">
+        <div class="section-title">🏖 Ferie</div>
+        <div class="section-desc">Definisci i periodi di chiusura aziendale. Vengono esclusi dal calcolo dei giorni lavorativi nel Gantt.</div>
+      </div>
+      <div class="section-body">
+
+        <!-- No DB -->
+        <div id="ferieNoDb" class="no-db-banner" style="display:none">
+          <div class="no-db-icon">📂</div>
+          <div class="no-db-text">Nessuna cartella Database collegata.<br>Seleziona la cartella per caricare e salvare i dati.</div>
+          <button class="no-db-btn" onclick="requestDb()">📂 Seleziona cartella Database</button>
+        </div>
+
+        <!-- Aggiunta range -->
+        <div class="card" id="ferieCard" style="display:none">
+          <div class="card-head">
+            <span class="card-head-icon">➕</span>
+            <span class="card-head-title">Aggiungi periodo</span>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Dal</label>
+                <input class="form-input" type="date" id="ferieDal">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Al</label>
+                <input class="form-input" type="date" id="ferieAl">
+              </div>
+              <button class="btn add" onclick="addFerieRange()">+ Aggiungi</button>
+            </div>
+            <div class="divider"></div>
+            <div class="form-row-single">
+              <div class="form-group">
+                <label class="form-label">Giorno singolo</label>
+                <input class="form-input" type="date" id="ferieSingolo">
+              </div>
+              <button class="btn add" onclick="addFerieSingolo()">+ Aggiungi</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista periodi -->
+        <div class="card" id="ferieListCard" style="display:none">
+          <div class="card-head">
+            <span class="card-head-icon">📋</span>
+            <span class="card-head-title">Periodi salvati</span>
+            <span class="card-head-badge" id="ferieCount">0</span>
+          </div>
+          <div class="card-body" style="padding-bottom:0">
+            <div id="ferieList" class="items-list" style="margin-top:0"></div>
+          </div>
+          <div class="card-footer">
+            <button class="btn danger" onclick="clearAllFerie()">🗑 Rimuovi tutti</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SEZIONE: FESTIVITÀ -->
+    <div id="section-festivita" class="section-content" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="section-header">
+        <div class="section-title">📅 Festività</div>
+        <div class="section-desc">Definisci i giorni festivi aziendali. Vengono evidenziati nel Gantt e esclusi dai giorni lavorativi.</div>
+      </div>
+      <div class="section-body">
+
+        <!-- No DB -->
+        <div id="festivitaNoDb" class="no-db-banner" style="display:none">
+          <div class="no-db-icon">📂</div>
+          <div class="no-db-text">Nessuna cartella Database collegata.<br>Seleziona la cartella per caricare e salvare i dati.</div>
+          <button class="no-db-btn" onclick="requestDb()">📂 Seleziona cartella Database</button>
+        </div>
+
+        <!-- Aggiunta giorno festivo -->
+        <div class="card" id="festivitaCard" style="display:none">
+          <div class="card-head">
+            <span class="card-head-icon">➕</span>
+            <span class="card-head-title">Aggiungi festività</span>
+          </div>
+          <div class="card-body">
+            <div class="form-row-single">
+              <div class="form-group">
+                <label class="form-label">Data</label>
+                <input class="form-input" type="date" id="festivitaData">
+              </div>
+              <button class="btn add" onclick="addFestivita()">+ Aggiungi</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista festività -->
+        <div class="card" id="festivitaListCard" style="display:none">
+          <div class="card-head">
+            <span class="card-head-icon">📋</span>
+            <span class="card-head-title">Giorni festivi salvati</span>
+            <span class="card-head-badge" id="festivitaCount">0</span>
+          </div>
+          <div class="card-body" style="padding-bottom:0">
+            <div id="festivitaList" class="items-list" style="margin-top:0"></div>
+          </div>
+          <div class="card-footer">
+            <button class="btn danger" onclick="clearAllFestivita()">🗑 Rimuovi tutti</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SEZIONE: PERCORSI -->
+    <div id="section-percorsi" class="section-content" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="section-header">
+        <div class="section-title">📂 Percorsi</div>
+        <div class="section-desc">Gestisci i percorsi delle cartelle e dei file JSON utilizzati dalla Suite. Le cartelle vengono ricordate tra le sessioni.</div>
+      </div>
+      <div class="section-body">
+
+        <!-- DATABASE JSON -->
+        <div class="path-card" id="pcDb">
+          <div class="path-card-head">
+            <span class="path-card-icon">🗄️</span>
+            <div class="path-card-info">
+              <div class="path-card-title">Database JSON</div>
+              <div class="path-card-subtitle">commesse.json · gantt.json · rubrica.json · machine_catalog.json</div>
+            </div>
+            <div class="path-status-pill" id="pcDbPill">
+              <span class="path-status-dot"></span>
+              <span id="pcDbPillTxt">—</span>
+            </div>
+          </div>
+          <div class="path-card-body">
+            <div class="path-folder-name" id="pcDbFolder">
+              <span class="pf-icon">📁</span>
+              <span class="pf-empty">Nessuna cartella selezionata</span>
+            </div>
+            <div class="path-json-chips" id="pcDbChips"></div>
+            <div class="path-actions">
+              <button class="path-btn primary" onclick="percorsiSelectDb()">📂 Seleziona cartella</button>
+              <button class="path-btn unlink" id="pcDbUnlink" style="display:none" onclick="percorsiUnlink('db')">✕ Scollega</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RADICE COMMESSE -->
+        <div class="path-card" id="pcComm">
+          <div class="path-card-head">
+            <span class="path-card-icon">🗂️</span>
+            <div class="path-card-info">
+              <div class="path-card-title">Cartella Radice Commesse</div>
+              <div class="path-card-subtitle">Cartella contenente le sottocartelle di ogni commessa</div>
+            </div>
+            <div class="path-status-pill" id="pcCommPill">
+              <span class="path-status-dot"></span>
+              <span id="pcCommPillTxt">—</span>
+            </div>
+          </div>
+          <div class="path-card-body">
+            <div class="path-folder-name" id="pcCommFolder">
+              <span class="pf-icon">📁</span>
+              <span class="pf-empty">Nessuna cartella selezionata</span>
+            </div>
+            <div class="path-actions">
+              <button class="path-btn primary" onclick="percorsiSelectComm()">📂 Seleziona cartella</button>
+              <button class="path-btn unlink" id="pcCommUnlink" style="display:none" onclick="percorsiUnlink('comm')">✕ Scollega</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SEZIONE: MACCHINE -->
+    <div id="section-macchine" class="section-content" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="section-header">
+        <div class="section-title">🔧 Catalogo Macchine</div>
+        <div class="section-desc">Gestisci il catalogo macchine OMAV. Carica o aggiorna da file Excel — i dati vengono salvati in <code style="color:var(--accent);font-size:9px">machine_catalog.json</code> nella cartella Database.</div>
+      </div>
+      <div id="mlBody" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+        <!-- Contenuto dinamico: toolbar + tabella oppure banner no-db -->
+        <div class="ml-no-db" id="mlNoDB">
+          <div class="ml-no-db-icon">🔧</div>
+          <div class="ml-no-db-text">Collega prima la cartella <strong>Database JSON</strong><br>dalla sezione Percorsi per gestire il catalogo macchine.</div>
+          <button class="path-btn primary" onclick="showSection('percorsi',document.querySelector('[data-section=percorsi]'))">📂 Vai a Percorsi</button>
+        </div>
+        <div id="mlMain" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+          <div class="ml-toolbar">
+            <input class="ml-search" id="mlSearch" type="text" placeholder="Cerca codice o descrizione…" oninput="mlFilter()">
+            <span class="ml-count-pill" id="mlCount">0 macchine</span>
+            <label class="ml-load-btn">
+              ↑ Carica / Aggiorna Excel
+              <input type="file" accept=".xlsx,.xls" onchange="mlLoadExcel(this.files[0]);this.value=''">
+            </label>
+          </div>
+          <div class="ml-table-wrap">
+            <div class="ml-empty" id="mlTableWrap">
+              <div style="font-size:36px;opacity:.2">🔧</div>
+              Carica il file Excel per popolare il catalogo macchine
+            </div>
+          </div>
+          <div class="ml-footer">
+            <span class="ml-footer-dot" id="mlFooterDot" style="background:var(--text3)"></span>
+            <span id="mlLastUpdate">Nessun catalogo caricato</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEZIONE: RUBRICA -->
+    <div id="section-rubrica" class="section-content" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="section-header">
+        <div class="section-title">👥 Rubrica Contatti</div>
+        <div class="section-desc">Gestisci i contatti del team OMAV. I dati vengono salvati in <code style="color:var(--accent);font-size:9px">rubrica.json</code> nella cartella Database.</div>
+      </div>
+      <!-- Banner no-db -->
+      <div class="rub-no-db" id="rubNoDB">
+        <div class="rub-no-db-icon">👥</div>
+        <div class="rub-no-db-text">Collega prima la cartella <strong>Database JSON</strong><br>dalla sezione Percorsi per gestire la rubrica.</div>
+        <button class="path-btn primary" onclick="showSection('percorsi',document.querySelector('[data-section=percorsi]'))">📂 Vai a Percorsi</button>
+      </div>
+      <!-- Layout lista + dettaglio -->
+      <div class="rub-layout" id="rubMain" style="display:none">
+        <div class="rub-list" id="rubList"></div>
+        <div class="rub-detail" id="rubDetail">
+          <div class="rub-detail-empty" id="rubEmpty">Seleziona un contatto dalla lista</div>
+          <div id="rubDetailContent" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  STATO
+// ═══════════════════════════════════════════════
+let dbHandle = null;
+let feriePeriodi = [];
+let specDays = {};
+let ganttRows = [];
+let isDirty = false;
+
+// ═══════════════════════════════════════════════
+//  INDEXEDDB — stesso store di Index
+// ═══════════════════════════════════════════════
+function openIDB(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open('omav-suite-v3',1);
+    r.onupgradeneeded=e=>e.target.result.createObjectStore('h');
+    r.onsuccess=e=>res(e.target.result);
+    r.onerror=rej;
+  });
+}
+async function loadH(k){
+  const db=await openIDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('h','readonly');
+    const r=tx.objectStore('h').get(k);
+    r.onsuccess=e=>res(e.target.result||null);
+    r.onerror=rej;
+  });
+}
+async function saveH(k,v){
+  const db=await openIDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('h','readwrite');
+    tx.objectStore('h').put(v,k);
+    tx.oncomplete=res;
+    tx.onerror=rej;
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  FILESYSTEM
+// ═══════════════════════════════════════════════
+async function readJSON(name){
+  try{
+    const fh=await dbHandle.getFileHandle(name);
+    return JSON.parse(await(await fh.getFile()).text());
+  }catch(e){return null}
+}
+async function writeJSON(name,data){
+  const fh=await dbHandle.getFileHandle(name,{create:true});
+  const w=await fh.createWritable();
+  await w.write(JSON.stringify(data,null,2));
+  await w.close();
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+async function init(){
+  try{
+    const hDb=await loadH('db');
+    if(hDb){
+      const p=await hDb.queryPermission({mode:'readwrite'});
+      if(p==='granted'){
+        dbHandle=hDb;
+        await loadAll();
+        return;
+      }
+      // Permesso scaduto — chiedi
+      const p2=await hDb.requestPermission({mode:'readwrite'});
+      if(p2==='granted'){
+        dbHandle=hDb;
+        await saveH('db',hDb);
+        await loadAll();
+        return;
+      }
+    }
+  }catch(e){}
+  showNoDb();
+}
+
+async function requestDb(){
+  try{
+    const h=await window.showDirectoryPicker({mode:'readwrite'});
+    dbHandle=h;
+    await saveH('db',h);
+    await loadAll();
+  }catch(e){
+    if(e.name!=='AbortError') toast('Errore apertura cartella: '+e.message,'err');
+  }
+}
+
+async function loadAll(){
+  const gd=await readJSON('gantt.json');
+  if(gd){
+    ganttRows=gd.rows||[];
+    specDays=gd.specDays||{};
+    feriePeriodi=gd.ferie||[];
+  }
+  isDirty=false;
+  renderAll();
+  showCards();
+  // Precarica badge macchine in background
+  try{
+    const fh=await dbHandle.getFileHandle('machine_catalog.json');
+    const data=JSON.parse(await(await fh.getFile()).text());
+    ML.machines=Array.isArray(data)?data:(data.machines||[]);
+    ML.lastUpdate=data.lastUpdate||null;
+    mlUpdateBadge();
+  }catch(e){}
+  // Precarica badge rubrica in background
+  try{
+    const fh=await dbHandle.getFileHandle('rubrica.json');
+    const rd=JSON.parse(await(await fh.getFile()).text());
+    RUBRICA=(rd&&Array.isArray(rd.contatti))?rd.contatti:[];
+    rubUpdateBadge();
+  }catch(e){}
+}
+
+async function saveAll(){
+  if(!dbHandle) return;
+  try{
+    await writeJSON('gantt.json',{rows:ganttRows,specDays,ferie:feriePeriodi});
+    isDirty=false;
+    toast('Impostazioni salvate ✓','ok');
+  }catch(e){
+    toast('Errore salvataggio: '+e.message,'err');
+  }
+}
+
+function markDirty(){
+  isDirty=true;
+  saveAll(); // salva automaticamente ad ogni modifica
+}
+
+// ═══════════════════════════════════════════════
+//  UI STATE
+// ═══════════════════════════════════════════════
+function showNoDb(){
+  document.getElementById('ferieNoDb').style.display='';
+  document.getElementById('ferieCard').style.display='none';
+  document.getElementById('ferieListCard').style.display='none';
+  document.getElementById('festivitaNoDb').style.display='';
+  document.getElementById('festivitaCard').style.display='none';
+  document.getElementById('festivitaListCard').style.display='none';
+}
+function showCards(){
+  document.getElementById('ferieNoDb').style.display='none';
+  document.getElementById('ferieCard').style.display='';
+  document.getElementById('ferieListCard').style.display='';
+  document.getElementById('festivitaNoDb').style.display='none';
+  document.getElementById('festivitaCard').style.display='';
+  document.getElementById('festivitaListCard').style.display='';
+}
+function showSection(id, el){
+  document.querySelectorAll('.section-content').forEach(s=>s.style.display='none');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const sec=document.getElementById('section-'+id);
+  if(sec){sec.style.display='flex';}
+  if(el) el.classList.add('active');
+  if(id==='percorsi') percorsiRender();
+  if(id==='macchine') mlSectionOpen();
+  if(id==='rubrica')  rubSectionOpen();
+}
+
+// ═══════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════
+function fmtDate(iso){
+  if(!iso)return'—';
+  const[y,m,d]=iso.split('-');
+  return`${d}/${m}/${y}`;
+}
+function renderAll(){
+  renderFerie();
+  renderFestivita();
+}
+
+// ═══════════════════════════════════════════════
+//  FERIE
+// ═══════════════════════════════════════════════
+function renderFerie(){
+  const list=document.getElementById('ferieList');
+  const count=document.getElementById('ferieCount');
+  const badge=document.getElementById('badgeFerie');
+  const n=feriePeriodi.length;
+  count.textContent=n;
+  badge.textContent=n||'—';
+  list.innerHTML='';
+  if(!n){
+    list.innerHTML='<div class="items-empty">Nessun periodo di ferie impostato.</div>';
+    return;
+  }
+  [...feriePeriodi].sort((a,b)=>a.dal.localeCompare(b.dal)).forEach((p,i)=>{
+    const row=document.createElement('div');
+    row.className='item-row';
+    const dot=document.createElement('span');dot.className='item-dot green';
+    const lbl=document.createElement('span');lbl.className='item-label';
+    lbl.textContent=p.dal===p.al?fmtDate(p.dal):fmtDate(p.dal)+' → '+fmtDate(p.al);
+    const days=p.dal===p.al?1:Math.round((new Date(p.al)-new Date(p.dal))/86400000)+1;
+    const sub=document.createElement('span');sub.className='item-sub';
+    sub.textContent=days===1?'1 giorno':days+' giorni';
+    const del=document.createElement('button');del.className='item-del';del.textContent='✕';del.title='Rimuovi';
+    del.onclick=()=>{feriePeriodi.splice(i,1);markDirty();renderFerie();};
+    row.appendChild(dot);row.appendChild(lbl);row.appendChild(sub);row.appendChild(del);
+    list.appendChild(row);
+  });
+}
+
+function _ferieOverlaps(dal,al){
+  return feriePeriodi.some(p=>p.dal<=al&&p.al>=dal);
+}
+function addFerieRange(){
+  const dal=document.getElementById('ferieDal').value;
+  const al=document.getElementById('ferieAl').value;
+  if(!dal||!al){toast('Seleziona entrambe le date.','warn');return;}
+  if(dal>al){toast('La data di inizio deve precedere quella di fine.','warn');return;}
+  if(_ferieOverlaps(dal,al)){toast('Il periodo si sovrappone a uno esistente.','warn');return;}
+  feriePeriodi.push({dal,al});
+  markDirty();renderFerie();
+  document.getElementById('ferieDal').value='';
+  document.getElementById('ferieAl').value='';
+}
+function addFerieSingolo(){
+  const d=document.getElementById('ferieSingolo').value;
+  if(!d){toast('Seleziona una data.','warn');return;}
+  if(_ferieOverlaps(d,d)){toast('Data già presente nei periodi ferie.','warn');return;}
+  feriePeriodi.push({dal:d,al:d});
+  markDirty();renderFerie();
+  document.getElementById('ferieSingolo').value='';
+}
+function clearAllFerie(){
+  if(!confirm('Eliminare tutti i periodi di ferie?'))return;
+  feriePeriodi=[];
+  markDirty();renderFerie();
+}
+
+// ═══════════════════════════════════════════════
+//  FESTIVITÀ
+// ═══════════════════════════════════════════════
+function getFestivi(){
+  return Object.entries(specDays)
+    .filter(([,v])=>v==='festivo')
+    .map(([k])=>k)
+    .sort();
+}
+function renderFestivita(){
+  const list=document.getElementById('festivitaList');
+  const count=document.getElementById('festivitaCount');
+  const badge=document.getElementById('badgeFestivita');
+  const festivi=getFestivi();
+  const n=festivi.length;
+  count.textContent=n;
+  badge.textContent=n||'—';
+  list.innerHTML='';
+  if(!n){
+    list.innerHTML='<div class="items-empty">Nessun giorno festivo impostato.</div>';
+    return;
+  }
+  festivi.forEach(iso=>{
+    const row=document.createElement('div');
+    row.className='item-row';
+    const dot=document.createElement('span');dot.className='item-dot orange';
+    const lbl=document.createElement('span');lbl.className='item-label';
+    lbl.textContent=fmtDate(iso);
+    const del=document.createElement('button');del.className='item-del';del.textContent='✕';del.title='Rimuovi';
+    del.onclick=()=>{delete specDays[iso];markDirty();renderFestivita();};
+    row.appendChild(dot);row.appendChild(lbl);row.appendChild(del);
+    list.appendChild(row);
+  });
+}
+function addFestivita(){
+  const d=document.getElementById('festivitaData').value;
+  if(!d){toast('Seleziona una data.','warn');return;}
+  if(specDays[d]==='festivo'){toast('Data già presente nelle festività.','warn');return;}
+  specDays[d]='festivo';
+  markDirty();renderFestivita();
+  document.getElementById('festivitaData').value='';
+}
+function clearAllFestivita(){
+  if(!confirm('Eliminare tutte le festività?'))return;
+  getFestivi().forEach(iso=>delete specDays[iso]);
+  markDirty();renderFestivita();
+}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+function toast(msg,type='ok'){
+  const t=document.createElement('div');
+  t.className='toast';
+  const color=type==='err'?'var(--red)':type==='warn'?'var(--orange)':'var(--green)';
+  t.style.cssText+=`;border:1px solid ${color};color:${color}`;
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2500);
+}
+
+// ═══════════════════════════════════════════════
+//  PERCORSI
+// ═══════════════════════════════════════════════
+const PC_JSON_DB = ['commesse.json','gantt.json','rubrica.json','machine_catalog.json'];
+
+async function percorsiRender(){
+  await percorsiRenderDb();
+  await percorsiRenderComm();
+}
+
+async function percorsiRenderDb(){
+  const h = await loadH('db');
+  const card  = document.getElementById('pcDb');
+  const pill  = document.getElementById('pcDbPill');
+  const pillTxt = document.getElementById('pcDbPillTxt');
+  const folder  = document.getElementById('pcDbFolder');
+  const chips   = document.getElementById('pcDbChips');
+  const unlink  = document.getElementById('pcDbUnlink');
+
+  if(!h){
+    card.className='path-card missing';
+    pill.className='path-status-pill err';pillTxt.textContent='Non collegata';
+    folder.innerHTML='<span class="pf-icon">📁</span><span class="pf-empty">Nessuna cartella selezionata</span>';
+    chips.innerHTML='';
+    unlink.style.display='none';
+    return;
+  }
+
+  // Controlla permesso
+  let perm='prompt';
+  try{ perm = await h.queryPermission({mode:'readwrite'}); }catch(e){}
+
+  if(perm!=='granted'){
+    card.className='path-card';
+    pill.className='path-status-pill warn';pillTxt.textContent='Permesso richiesto';
+    folder.innerHTML=`<span class="pf-icon">📁</span><span class="pf-name">${h.name}</span>`;
+    chips.innerHTML='';
+    unlink.style.display='';
+    return;
+  }
+
+  // Verifica file JSON
+  card.className='path-card connected';
+  pill.className='path-status-pill ok';pillTxt.textContent='Collegata';
+  folder.innerHTML=`<span class="pf-icon">📁</span><span class="pf-name">${h.name}</span>`;
+  unlink.style.display='';
+
+  // Chip per ogni json
+  chips.innerHTML='';
+  for(const fname of PC_JSON_DB){
+    const chip=document.createElement('span');
+    let found=false;
+    try{ await h.getFileHandle(fname); found=true; }catch(e){}
+    chip.className='json-chip '+(found?'found':'notfound');
+    chip.innerHTML=(found?'✓ ':'✗ ')+fname;
+    chips.appendChild(chip);
+  }
+}
+
+async function percorsiRenderComm(){
+  const h = await loadH('comm');
+  const card    = document.getElementById('pcComm');
+  const pill    = document.getElementById('pcCommPill');
+  const pillTxt = document.getElementById('pcCommPillTxt');
+  const folder  = document.getElementById('pcCommFolder');
+  const unlink  = document.getElementById('pcCommUnlink');
+
+  if(!h){
+    card.className='path-card missing';
+    pill.className='path-status-pill err';pillTxt.textContent='Non collegata';
+    folder.innerHTML='<span class="pf-icon">📁</span><span class="pf-empty">Nessuna cartella selezionata</span>';
+    unlink.style.display='none';
+    return;
+  }
+
+  let perm='prompt';
+  try{ perm = await h.queryPermission({mode:'readwrite'}); }catch(e){}
+
+  if(perm!=='granted'){
+    card.className='path-card';
+    pill.className='path-status-pill warn';pillTxt.textContent='Permesso richiesto';
+    folder.innerHTML=`<span class="pf-icon">📁</span><span class="pf-name">${h.name}</span>`;
+    unlink.style.display='';
+    return;
+  }
+
+  card.className='path-card connected';
+  pill.className='path-status-pill ok';pillTxt.textContent='Collegata';
+  folder.innerHTML=`<span class="pf-icon">📁</span><span class="pf-name">${h.name}</span>`;
+  unlink.style.display='';
+}
+
+async function percorsiSelectDb(){
+  try{
+    const h = await window.showDirectoryPicker({mode:'readwrite'});
+    await saveH('db', h);
+    dbHandle = h;
+    await loadAll();
+    await percorsiRenderDb();
+    toast('✓ Cartella Database collegata','ok');
+  }catch(e){
+    if(e.name!=='AbortError') toast('Errore: '+e.message,'err');
+  }
+}
+
+async function percorsiSelectComm(){
+  try{
+    const h = await window.showDirectoryPicker({mode:'readwrite'});
+    await saveH('comm', h);
+    await percorsiRenderComm();
+    toast('✓ Cartella Radice collegata','ok');
+  }catch(e){
+    if(e.name!=='AbortError') toast('Errore: '+e.message,'err');
+  }
+}
+
+async function percorsiUnlink(key){
+  const label = key==='db' ? 'Database JSON' : 'Radice Commesse';
+  if(!confirm(`Scollegare la cartella "${label}"?\nDovrà essere riselezionata al prossimo avvio.`)) return;
+  const idb = await openIDB();
+  await new Promise((res,rej)=>{
+    const tx=idb.transaction('h','readwrite');
+    tx.objectStore('h').delete(key);
+    tx.oncomplete=res; tx.onerror=rej;
+  });
+  if(key==='db'){ dbHandle=null; }
+  await percorsiRender();
+  toast(`Cartella ${label} scollegata`,'warn');
+}
+
+// ═══════════════════════════════════════════════
+//  CATALOGO MACCHINE
+// ═══════════════════════════════════════════════
+const ML = { machines: [], lastUpdate: null };
+
+async function mlSectionOpen() {
+  // Controlla se dbHandle è disponibile e ha permesso
+  const h = await loadH('db');
+  if (!h) { mlShowNoDB(); return; }
+  let perm = 'prompt';
+  try { perm = await h.queryPermission({ mode: 'readwrite' }); } catch(e) {}
+  if (perm !== 'granted') { mlShowNoDB(); return; }
+  // dbHandle in memoria potrebbe non essere aggiornato
+  dbHandle = h;
+  document.getElementById('mlNoDB').style.display = 'none';
+  document.getElementById('mlMain').style.display  = 'flex';
+  await mlLoadFromDB();
+}
+
+function mlShowNoDB() {
+  document.getElementById('mlNoDB').style.display = 'flex';
+  document.getElementById('mlMain').style.display  = 'none';
+}
+
+async function mlLoadFromDB() {
+  try {
+    const fh   = await dbHandle.getFileHandle('machine_catalog.json');
+    const text = await (await fh.getFile()).text();
+    const data = JSON.parse(text);
+    ML.machines   = Array.isArray(data) ? data : (data.machines || []);
+    ML.lastUpdate = data.lastUpdate || null;
+  } catch(e) {
+    ML.machines   = [];
+    ML.lastUpdate = null;
+  }
+  mlRenderTable(ML.machines);
+  mlUpdateFooter();
+  mlUpdateBadge();
+}
+
+async function mlSaveToDB() {
+  const data = { machines: ML.machines, lastUpdate: ML.lastUpdate };
+  const fh   = await dbHandle.getFileHandle('machine_catalog.json', { create: true });
+  const w    = await fh.createWritable();
+  await w.write(JSON.stringify(data, null, 2));
+  await w.close();
+}
+
+async function mlLoadExcel(file) {
+  if (!file) return;
+  if (!dbHandle) { toast('Collega prima il Database dalla sezione Percorsi', 'warn'); return; }
+  try {
+    const buf  = await file.arrayBuffer();
+    const wb   = XLSX.read(buf, { type: 'array' });
+    // Prova foglio 2 (indice 1), fallback su foglio 1
+    const sheetIdx = wb.SheetNames.length > 1 ? 1 : 0;
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[sheetIdx]], { header: 1 });
+    ML.machines = [];
+    // Salta le prime 2 righe (intestazioni), legge da riga 3
+    for (let i = 2; i < rows.length; i++) {
+      const r    = rows[i];
+      const code = (r[0]||'').toString().trim();
+      if (!code) continue;
+      ML.machines.push({
+        code,
+        itDesc: (r[2]||'').toString().trim(),
+        enDesc: (r[3]||'').toString().trim(),
+      });
+    }
+    ML.lastUpdate = new Date().toLocaleString('it-IT');
+    await mlSaveToDB();
+    mlRenderTable(ML.machines);
+    mlUpdateFooter();
+    mlUpdateBadge();
+    toast(`✅ ${ML.machines.length} macchine caricate e salvate`, 'ok');
+  } catch(e) {
+    toast('Errore Excel: ' + e.message, 'err');
+  }
+}
+
+function mlFilter() {
+  const q = document.getElementById('mlSearch').value.toLowerCase();
+  const filtered = q
+    ? ML.machines.filter(m =>
+        m.code.toLowerCase().includes(q) ||
+        (m.itDesc||'').toLowerCase().includes(q) ||
+        (m.enDesc||'').toLowerCase().includes(q))
+    : ML.machines;
+  mlRenderTable(filtered);
+  document.getElementById('mlCount').textContent = `${filtered.length} macchine`;
+}
+
+function mlRenderTable(list) {
+  const wrap = document.getElementById('mlTableWrap');
+  document.getElementById('mlCount').textContent = `${list.length} macchine`;
+  if (!list.length) {
+    wrap.innerHTML = `<div class="ml-empty"><div style="font-size:36px;opacity:.2">🔧</div>${ML.machines.length ? 'Nessun risultato trovato' : 'Carica il file Excel per popolare il catalogo macchine'}</div>`;
+    return;
+  }
+  wrap.innerHTML = `<table class="ml-table">
+    <thead><tr>
+      <th style="width:140px">Codice</th>
+      <th>Descrizione IT</th>
+      <th style="color:var(--text3)">Descrizione EN</th>
+    </tr></thead>
+    <tbody>${list.map(m => `
+      <tr>
+        <td class="ml-code">${esc(m.code)}</td>
+        <td>${esc(m.itDesc||'')}</td>
+        <td style="color:var(--text3)">${esc(m.enDesc||'')}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+function mlUpdateFooter() {
+  const dot = document.getElementById('mlFooterDot');
+  const lbl = document.getElementById('mlLastUpdate');
+  if (ML.lastUpdate) {
+    dot.style.background = 'var(--green)';
+    lbl.textContent = `machine_catalog.json — ${ML.machines.length} macchine — aggiornato ${ML.lastUpdate}`;
+  } else {
+    dot.style.background = 'var(--text3)';
+    lbl.textContent = 'Nessun catalogo trovato — verrà creato al caricamento Excel';
+  }
+}
+
+function mlUpdateBadge() {
+  const b = document.getElementById('badgeMacchine');
+  if (b) b.textContent = ML.machines.length > 0 ? ML.machines.length : '—';
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ═══════════════════════════════════════════════
+//  RUBRICA
+// ═══════════════════════════════════════════════
+let RUBRICA = [];
+let rubSelIdx = null, rubEditMode = false;
+
+const UFFICI_RUBRICA = [
+  {id:'pm',           label:'Ufficio PM'},
+  {id:'tecnico',      label:'Ufficio Tecnico'},
+  {id:'combustione',  label:'Ufficio Combustione'},
+  {id:'layout',       label:'Ufficio Layout'},
+  {id:'elettrico',    label:'Ufficio Elettrico'},
+  {id:'idraulica',    label:'Ufficio Idraulica'},
+  {id:'handling',     label:'Ufficio Handling'},
+  {id:'sicurezza',    label:'Ufficio Sicurezza'},
+  {id:'manualistica', label:'Ufficio Manualistica'},
+];
+
+async function rubSectionOpen() {
+  const h = await loadH('db');
+  if (!h) { rubShowNoDB(); return; }
+  let perm = 'prompt';
+  try { perm = await h.queryPermission({ mode: 'readwrite' }); } catch(e) {}
+  if (perm !== 'granted') { rubShowNoDB(); return; }
+  dbHandle = h;
+  document.getElementById('rubNoDB').style.display = 'none';
+  document.getElementById('rubMain').style.display  = 'flex';
+  await rubLoad();
+  rubSelIdx = null; rubEditMode = false;
+  renderRubrica();
+}
+
+function rubShowNoDB() {
+  document.getElementById('rubNoDB').style.display = 'flex';
+  document.getElementById('rubMain').style.display  = 'none';
+}
+
+async function rubLoad() {
+  if (!dbHandle) return;
+  try {
+    const fh = await dbHandle.getFileHandle('rubrica.json');
+    const rd = JSON.parse(await (await fh.getFile()).text());
+    RUBRICA = (rd && Array.isArray(rd.contatti)) ? rd.contatti : [];
+  } catch(e) { RUBRICA = []; }
+  rubUpdateBadge();
+}
+
+async function rubSave() {
+  if (!dbHandle) { toast('Nessuna cartella database collegata', 'err'); return; }
+  try {
+    const fh = await dbHandle.getFileHandle('rubrica.json', { create: true });
+    const w  = await fh.createWritable();
+    await w.write(JSON.stringify({ contatti: RUBRICA }, null, 2));
+    await w.close();
+    rubUpdateBadge();
+    toast('Rubrica salvata ✓', 'ok');
+  } catch(e) { toast('Errore salvataggio rubrica: ' + e.message, 'err'); }
+}
+
+function rubUpdateBadge() {
+  const b = document.getElementById('badgeRubrica');
+  if (b) b.textContent = RUBRICA.length > 0 ? RUBRICA.length : '—';
+}
+
+function renderRubrica() {
+  const list = document.getElementById('rubList');
+  if (!list) return;
+  list.innerHTML = '';
+  // Pulsante nuovo contatto
+  const newBtn = document.createElement('button');
+  newBtn.className = 'rub-new-btn';
+  newBtn.textContent = '＋ Nuovo Contatto';
+  newBtn.onclick = rubNewContact;
+  list.appendChild(newBtn);
+
+  [...RUBRICA].sort((a,b) => (a.cognome||'').localeCompare(b.cognome||'')).forEach(c => {
+    const origIdx = RUBRICA.indexOf(c);
+    const item = document.createElement('div');
+    item.className = 'rub-item' + (rubSelIdx === origIdx ? ' active' : '');
+    item.dataset.idx = origIdx;
+    const name  = document.createElement('div'); name.className  = 'rub-item-name';  name.textContent  = (c.nome||'') + ' ' + (c.cognome||'');
+    const email = document.createElement('div'); email.className = 'rub-item-email'; email.textContent = c.email || '—';
+    item.appendChild(name); item.appendChild(email);
+    item.onclick = () => rubSelect(origIdx);
+    list.appendChild(item);
+  });
+
+  if (rubSelIdx !== null) rubShowDetail(rubSelIdx, rubEditMode);
+}
+
+function rubSelect(idx) { rubSelIdx = idx; rubEditMode = false; renderRubrica(); }
+
+function rubNewContact() {
+  RUBRICA.push({ nome: '', cognome: '', email: '', ufficio: '' });
+  rubSelIdx = RUBRICA.length - 1; rubEditMode = true;
+  renderRubrica();
+  setTimeout(() => document.getElementById('rubInpNome')?.focus(), 50);
+}
+
+function rubShowDetail(idx, edit) {
+  const c = RUBRICA[idx]; if (!c) return;
+  document.getElementById('rubEmpty').style.display = 'none';
+  const wrap = document.getElementById('rubDetailContent');
+  wrap.style.display = ''; wrap.innerHTML = '';
+
+  const initials = ((c.nome?.[0]||'') + (c.cognome?.[0]||'')).toUpperCase();
+  const hdr = document.createElement('div'); hdr.className = 'rub-detail-header';
+  const av  = document.createElement('div'); av.className  = 'rub-detail-avatar'; av.textContent = initials || '?';
+  const titleWrap = document.createElement('div'); titleWrap.className = 'rub-detail-title';
+  const fullname  = document.createElement('div'); fullname.className  = 'rub-detail-fullname'; fullname.textContent = (c.nome||'') + ' ' + (c.cognome||'');
+  const sub       = document.createElement('div'); sub.className       = 'rub-detail-sub';      sub.textContent = c.email || '';
+  titleWrap.appendChild(fullname); titleWrap.appendChild(sub);
+
+  const acts = document.createElement('div'); acts.className = 'rub-detail-actions';
+  if (!edit) {
+    const btnEdit = document.createElement('button'); btnEdit.className = 'rub-btn'; btnEdit.textContent = '✏ Modifica';
+    btnEdit.onclick = () => { rubEditMode = true; rubShowDetail(idx, true); };
+    acts.appendChild(btnEdit);
+  }
+  const btnDel = document.createElement('button'); btnDel.className = 'rub-btn danger'; btnDel.textContent = '🗑 Elimina';
+  btnDel.onclick = () => {
+    if (!confirm('Eliminare ' + (c.nome||'') + ' ' + (c.cognome||'') + ' dalla rubrica?')) return;
+    RUBRICA.splice(idx, 1); rubSelIdx = null; rubEditMode = false;
+    document.getElementById('rubEmpty').style.display = '';
+    document.getElementById('rubDetailContent').style.display = 'none';
+    renderRubrica(); rubSave();
+  };
+  acts.appendChild(btnDel);
+  hdr.appendChild(av); hdr.appendChild(titleWrap); hdr.appendChild(acts);
+  wrap.appendChild(hdr);
+
+  // Campi testo
+  [{label:'Nome', key:'nome', mono:false}, {label:'Cognome', key:'cognome', mono:false}, {label:'Email', key:'email', mono:true}].forEach(f => {
+    const row = document.createElement('div'); row.className = 'rub-field';
+    const lbl = document.createElement('div'); lbl.className = 'rub-field-label'; lbl.textContent = f.label;
+    if (edit) {
+      const inp = document.createElement('input');
+      inp.id = 'rubInp' + f.key.charAt(0).toUpperCase() + f.key.slice(1);
+      inp.value = c[f.key] || ''; if (f.mono) inp.className = 'mono';
+      inp.type = f.key === 'email' ? 'email' : 'text'; inp.placeholder = f.label + '…';
+      row.appendChild(lbl); row.appendChild(inp);
+    } else {
+      const val = document.createElement('div'); val.className = 'rub-field-value' + (f.mono ? ' mono' : ''); val.textContent = c[f.key] || '—';
+      row.appendChild(lbl); row.appendChild(val);
+    }
+    wrap.appendChild(row);
+  });
+
+  // Ufficio
+  const uRow = document.createElement('div'); uRow.className = 'rub-field';
+  const uLbl = document.createElement('div'); uLbl.className = 'rub-field-label'; uLbl.textContent = 'Ufficio'; uRow.appendChild(uLbl);
+  if (edit) {
+    const sel = document.createElement('select'); sel.id = 'rubInpUfficio';
+    sel.innerHTML = '<option value="">— Nessun ufficio —</option>';
+    UFFICI_RUBRICA.forEach(u => { const o = document.createElement('option'); o.value = u.id; o.textContent = u.label; if (c.ufficio === u.id) o.selected = true; sel.appendChild(o); });
+    uRow.appendChild(sel);
+  } else {
+    const val = document.createElement('div'); val.className = 'rub-field-value'; val.textContent = UFFICI_RUBRICA.find(u => u.id === c.ufficio)?.label || '—'; uRow.appendChild(val);
+  }
+  wrap.appendChild(uRow);
+
+  // isPM
+  const pmRow = document.createElement('div'); pmRow.className = 'rub-field';
+  const pmLbl = document.createElement('div'); pmLbl.className = 'rub-field-label'; pmLbl.textContent = 'Ruolo PM'; pmRow.appendChild(pmLbl);
+  if (edit) {
+    const pmWrap = document.createElement('label'); pmWrap.style.cssText = 'display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:4px';
+    const pmCb   = document.createElement('input'); pmCb.type = 'checkbox'; pmCb.id = 'rubInpIsPM'; pmCb.checked = !!c.isPM;
+    pmCb.style.cssText = 'width:16px;height:16px;cursor:pointer;accent-color:var(--accent)';
+    const pmSpan = document.createElement('span'); pmSpan.style.cssText = 'font-size:12px;color:var(--text2)'; pmSpan.textContent = 'Project Manager (comparirà come PM nelle commesse)';
+    pmWrap.appendChild(pmCb); pmWrap.appendChild(pmSpan); pmRow.appendChild(pmWrap);
+  } else {
+    const val = document.createElement('div'); val.className = 'rub-field-value';
+    if (c.isPM) { val.innerHTML = '<span style="font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(91,156,246,.15);border:1px solid rgba(91,156,246,.4);color:var(--accent)">⭐ Project Manager</span>'; }
+    else { val.textContent = '—'; }
+    pmRow.appendChild(val);
+  }
+  wrap.appendChild(pmRow);
+
+  if (edit) {
+    const foot = document.createElement('div'); foot.style.cssText = 'display:flex;gap:8px;margin-top:20px';
+    const btnS = document.createElement('button'); btnS.className = 'rub-btn save'; btnS.textContent = '💾 Salva';
+    btnS.onclick = () => {
+      const nome     = (document.getElementById('rubInpNome')?.value    || '').trim();
+      const cognome  = (document.getElementById('rubInpCognome')?.value || '').trim();
+      const email    = (document.getElementById('rubInpEmail')?.value   || '').trim();
+      const ufficio  = document.getElementById('rubInpUfficio')?.value  || '';
+      if (!nome || !cognome) { alert('Inserisci nome e cognome.'); return; }
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Indirizzo email non valido.'); return; }
+      RUBRICA[idx] = { nome, cognome, email, ufficio, isPM: !!document.getElementById('rubInpIsPM')?.checked };
+      rubEditMode = false; renderRubrica(); rubSave();
+    };
+    const btnC = document.createElement('button'); btnC.className = 'rub-btn'; btnC.textContent = 'Annulla';
+    btnC.onclick = () => {
+      if (!c.nome && !c.cognome) { RUBRICA.splice(idx,1); rubSelIdx=null; document.getElementById('rubEmpty').style.display=''; document.getElementById('rubDetailContent').style.display='none'; renderRubrica(); return; }
+      rubEditMode = false; rubShowDetail(idx, false);
+    };
+    foot.appendChild(btnS); foot.appendChild(btnC); wrap.appendChild(foot);
+  }
+}
+
+// ── AVVIO
+init();
+</script>
+</body>
+</html>

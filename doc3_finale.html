@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMAV — Documentazione Finale</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#111318;--surface:#191c24;--surface2:#1f2330;--surface3:#252a38;--border:#2a2f40;--border2:#353d54;--accent:#e8a020;--accent2:#f0c060;--blue:#4a8fe8;--green:#3ec98e;--red:#e85555;--purple:#a78bfa;--text:#dde3f0;--muted:#5a6380;--muted2:#8892aa;--cond:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;--mono:'JetBrains Mono',monospace}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--body);display:flex;flex-direction:column}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse-warn{0%,100%{box-shadow:0 0 5px rgba(232,160,32,.45)}50%{box-shadow:0 0 10px rgba(232,160,32,.8)}}
+.spinning{animation:spin .6s linear infinite}
+.body-layout{flex:1;display:flex;overflow:hidden}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.main-topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;min-height:50px}
+.main-topbar-title{font-family:var(--cond);font-size:16px;font-weight:600;letter-spacing:.08em;color:var(--text);flex:1}
+.main-topbar-title small{font-size:11px;font-family:var(--mono);color:var(--muted2);font-weight:400;margin-left:8px}
+.btn{font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:3px;border:1px solid;cursor:pointer;transition:all .15s;letter-spacing:.04em;background:transparent;white-space:nowrap}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn-accent{border-color:var(--accent);color:var(--accent)}
+.btn-accent:not(:disabled):hover{background:var(--accent);color:#111}
+.btn-green{border-color:var(--green);color:var(--green)}
+.btn-green:not(:disabled):hover{background:var(--green);color:#111}
+.btn-blue{border-color:var(--blue);color:var(--blue)}
+.btn-blue:not(:disabled):hover{background:var(--blue);color:#fff}
+.btn-red{border-color:var(--red);color:var(--red)}
+.btn-red:not(:disabled):hover{background:var(--red);color:#fff}
+.btn-plus{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;background:transparent;flex-shrink:0}
+.btn-plus:hover{background:var(--accent);color:#111}
+.btn-refresh{width:24px;height:24px;border-radius:50%;border:1px solid var(--border2);color:var(--muted2);font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;background:transparent;flex-shrink:0;padding:0}
+.btn-refresh:hover{border-color:var(--accent);color:var(--accent)}
+.btn-refresh:disabled{opacity:.3;cursor:not-allowed}
+.status-bar{background:var(--surface);border-top:1px solid var(--border);padding:6px 20px;font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;gap:20px;align-items:center;flex-shrink:0}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px}
+.dot.ok{background:var(--green)}.dot.warn{background:var(--accent)}.dot.err{background:var(--red)}.dot.idle{background:var(--muted)}
+.toast{position:fixed;bottom:20px;right:20px;z-index:500;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:12px 18px;font-family:var(--mono);font-size:11px;box-shadow:0 8px 32px rgba(0,0,0,.5);transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);max-width:320px;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:var(--green);color:var(--green)}.toast.err{border-color:var(--red);color:var(--red)}.toast.warn{border-color:var(--accent);color:var(--accent)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.wizard{background:var(--surface);border:1px solid var(--border2);border-radius:6px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.wiz-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.wiz-header h2{font-family:var(--cond);font-size:18px;font-weight:600;letter-spacing:.06em;color:var(--accent);flex:1}
+.wiz-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:2px 6px}
+.wiz-close:hover{color:var(--red)}
+.wiz-body{padding:20px 24px}
+.wiz-step{margin-bottom:20px}
+.wiz-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted2);margin-bottom:7px;display:block;text-transform:uppercase}
+.wiz-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wiz-input{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 11px;outline:none}
+.wiz-input:focus{border-color:var(--accent)}
+.wiz-input::placeholder{color:var(--muted)}
+.preview-box{font-family:var(--mono);font-size:12px;color:var(--accent2);background:rgba(232,160,32,.07);border:1px solid rgba(232,160,32,.2);padding:7px 11px;border-radius:3px;min-height:30px;word-break:break-all;margin-top:4px}
+.wiz-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.btn-wiz-cancel{font-family:var(--mono);font-size:12px;padding:8px 18px;border-radius:3px;border:1px solid var(--border2);color:var(--muted2);background:none;cursor:pointer}
+.btn-wiz-cancel:hover{border-color:var(--muted2);color:var(--text)}
+.btn-wiz-ok{font-family:var(--cond);font-size:15px;font-weight:700;letter-spacing:.1em;padding:8px 24px;border-radius:3px;border:none;background:var(--accent);color:#111;cursor:pointer;transition:all .15s}
+.btn-wiz-ok:hover:not(:disabled){background:var(--accent2)}
+.btn-wiz-ok:disabled{opacity:.3;cursor:not-allowed}
+</style>
+
+</head>
+<body>
+
+
+<!-- ══ BODY ══ -->
+<div class="body-layout">
+
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="main-topbar">
+      <div class="main-topbar-title" id="mainTitle">
+        <span style="color:var(--muted)">Seleziona una commessa</span>
+      </div>
+      <button class="btn-refresh" id="btnRefresh" title="Aggiorna" onclick="refreshActive()" style="display:none;width:28px;height:28px;font-size:15px">⟳</button>
+    </div>
+
+    <!-- TOOLBAR FD -->
+    <div class="jo-toolbar" id="finaleToolbar" style="display:none">
+      <span class="jo-info" id="finaleInfo">—</span>
+      <button class="jo-btn" onclick="loadFinaleTab()">⟳ Ricarica</button>
+    </div>
+
+    <!-- FOLDER TABS -->
+    <div class="folder-tabs-bar" id="folderTabsBar"></div>
+
+    <!-- FINALE CONTENT -->
+    <div class="finale-content">
+
+      <!-- DETAIL BAR -->
+      <div class="folder-detail-bar" id="folderDetailBar" style="display:none">
+        <span class="folder-detail-name" id="folderDetailName">—</span>
+        <span class="folder-detail-count" id="folderDetailCount"></span>
+        <span class="folder-detail-status" id="folderDetailStatus"></span>
+      </div>
+
+      <!-- SPLIT: tree + upload -->
+      <div class="finale-split">
+        <div class="split-tree">
+          <div class="tree-area" id="finaleArea">
+            <div class="tree-empty"><div class="big">📦</div>Seleziona una commessa.</div>
+          </div>
+        </div>
+        <div class="split-upload">
+          <div class="upload-header">
+            Destinazione:
+            <span class="upload-target" id="uploadTarget">— clicca una cartella —</span>
+          </div>
+          <div class="upload-no-target" id="uploadNoTarget">
+            <div style="font-size:32px;opacity:.2">📂</div>
+            Clicca una cartella nel tree<br>per selezionarla come destinazione
+          </div>
+          <div id="uploadBody" style="display:none;flex:1;flex-direction:column;gap:12px;padding:16px;overflow-y:auto">
+            <div class="upload-dz" id="uploadDz">
+              <input type="file" multiple id="uploadInput" onchange="uploadFilesSelected(this.files)">
+              <div class="upload-dz-icon">📥</div>
+              <div class="upload-dz-label"><strong>Trascina file qui</strong><br>oppure clicca per selezionare</div>
+            </div>
+            <div id="uploadQueueWrap" style="display:none">
+              <div class="upload-queue-label">File in coda</div>
+              <div class="upload-queue" id="uploadQueue"></div>
+            </div>
+            <div class="upload-actions">
+              <button class="btn-upload-clear" onclick="uploadClear()">✕ Svuota</button>
+              <button class="btn-upload-go" id="btnUploadGo" disabled onclick="uploadExecute()">⬆ Carica file</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- finale-content -->
+
+    <div class="status-bar">
+      <span><span class="dot idle" id="statusDot"></span><span id="statusText">Pronto</span></span>
+      <span id="statusExtra"></span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ WIZARD CREA STRUTTURA FD ══ -->
+<div class="overlay" id="overlay">
+  <div class="wizard">
+    <div class="wiz-header">
+      <h2 id="wizTitle">Nuova struttura Finale</h2>
+      <button class="wiz-close" onclick="closeWizard()">✕</button>
+    </div>
+    <div class="wiz-body">
+      <div class="wiz-step">
+        <span class="wiz-label">Struttura che verrà creata</span>
+        <div class="preview-box" id="wizPreviewName">—</div>
+      </div>
+      <div class="wiz-step">
+        <span class="wiz-label">Cartelle standard</span>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted2);line-height:1.8;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 12px" id="wizFolderList">—</div>
+      </div>
+    </div>
+    <div class="wiz-footer">
+      <button class="btn-wiz-cancel" onclick="closeWizard()">Annulla</button>
+      <button class="btn-wiz-ok" id="btnWizOk" onclick="generateStructureFinale()">⚡ Crea struttura</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="shared.js"></script>
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// STATO
+// ═══════════════════════════════════════════════════════
+const S = { rootHandle: null, active: null };
+
+const FOLDERS_FINALE = [
+  { name:'Att01_OperatorsManuals',     subs:[] },
+  { name:'Att02_Declarations',         subs:[] },
+  { name:'Att03_AssemblyInstructions', subs:[] },
+  { name:'Att04_Layout',               subs:[] },
+  { name:'Att05_Drawings',             subs:[] },
+  { name:'Att06_Diagrams',             subs:['Combustion','Electric','Hydraulic','Pneumatic','Water'] },
+  { name:'Att07_Commercialcomponents', subs:[] },
+];
+const FINALE_TAB_LABELS = ['Operators Manuals','Declarations','Assembly Instr.','Layout','Drawings','Diagrams','Commercial'];
+const FINALE_TAB_NUMS   = ['01','02','03','04','05','06','07'];
+
+const finaleTabState = { activeFolderIdx: -1, statuses: [], fdPath: null };
+const uploadState    = { dirPath: null, dirName: '', files: [] };
+
+// ═══════════════════════════════════════════════════════
+// INIT ROOT
+// ═══════════════════════════════════════════════════════
+// ── Avvio: solo modalità bridge da Index.html ───────────────────
+(async () => {
+  try {
+    const bridge = window.parent?.OMAV_BRIDGE;
+    if (bridge?.commHandle) {
+      S.rootHandle = bridge.commHandle;
+      setStatus('Pronto','ok');
+      if (bridge.activeCommessa) {
+        for await (const [name, handle] of bridge.commHandle.entries()) {
+          if (handle.kind === 'directory' && name.startsWith(bridge.activeCommessa + '_')) {
+            const m = name.match(/^(\d{4})_(.+)_([A-Z]{2,4})$/);
+            if (m) await selectCommessa({ code:m[1], desc:m[2].replace(/_/g,' '), country:m[3], name, handle });
+            break;
+          }
+        }
+      }
+    }
+  } catch(e) {}
+})();
+
+// ═══════════════════════════════════════════════════════
+// SELEZIONE COMMESSA
+// ═══════════════════════════════════════════════════════
+async function selectCommessa(commessa) {
+  const c = typeof commessa === 'string'
+    ? (() => { const m = commessa.match(/^(\d{4})_(.+)_([A-Z]{2,4})$/); return m ? { code:m[1], desc:m[2].replace(/_/g,' '), country:m[3], name:commessa, handle:null } : null; })()
+    : commessa;
+  if(!c) return;
+  S.active = c;
+  finaleTabState.activeFolderIdx = -1;
+  uploadState.dirPath = null;
+  document.getElementById('mainTitle').innerHTML=`<span style="color:var(--accent)">${c.code}</span><span style="margin:0 6px">—</span>${esc(c.desc)} <small>${c.country}</small>`;
+  document.getElementById('btnRefresh').style.display='flex';
+  setStatus(`Caricamento: ${c.name}`,'warn');
+  await loadFinaleTab();
+  setStatus(c.name,'ok');
+}
+
+async function refreshActive() {
+  if (!S.active) return;
+  const btn = document.getElementById('btnRefresh');
+  btn.classList.add('spinning'); btn.disabled=true;
+  await loadFinaleTab();
+  btn.classList.remove('spinning'); btn.disabled=false;
+  toast('Aggiornato','ok');
+}
+
+// ═══════════════════════════════════════════════════════
+// CARICA TAB FINALE
+// ═══════════════════════════════════════════════════════
+async function loadFinaleTab() {
+  if (!S.active) return;
+  const area    = document.getElementById('finaleArea');
+  const toolbar = document.getElementById('finaleToolbar');
+
+  const commessaPath = S.active.name;
+  const re = new RegExp('^'+S.active.code+'_FD_r','i');
+  const items = await OMAV.fs.ls(commessaPath);
+  const fdItem = items.find(i=>i.kind==='directory'&&re.test(i.name));
+
+  if (!fdItem) {
+    toolbar.style.display='none';
+    document.getElementById('folderTabsBar').classList.remove('visible');
+    document.getElementById('folderDetailBar').style.display='none';
+    area.innerHTML=`<div class="tree-empty">
+      <div class="big">📦</div>
+      Cartella FD non trovata.<br>
+      <button class="jo-btn" style="margin-top:10px;border-color:var(--accent);color:var(--accent)" onclick="openWizardFinale()">＋ Crea struttura Finale</button><br>
+      <a href="doc1_struttura.html" style="color:var(--muted);font-family:var(--mono);font-size:11px;margin-top:8px;display:block">→ Vai a Struttura per crearla</a>
+    </div>`;
+    return;
+  }
+
+  finaleTabState.fdPath = pathJoin(commessaPath, fdItem.name);
+  toolbar.style.display='flex';
+  document.getElementById('finaleInfo').textContent = fdItem.name;
+
+  const fdItems = await OMAV.fs.ls(finaleTabState.fdPath);
+  await computeFinaleStatuses(fdItems);
+  renderFinaleTabsBar();
+  document.getElementById('folderDetailBar').style.display='none';
+
+  area.innerHTML=`<div class="tree-empty"><div class="big" style="opacity:.15">👆</div>Seleziona una sezione dalla barra in alto.</div>`;
+  resetUpload();
+}
+
+// ═══════════════════════════════════════════════════════
+// STATUSES
+// ═══════════════════════════════════════════════════════
+async function computeFinaleStatuses(fdItems) {
+  finaleTabState.statuses = [];
+  for (let fi=0; fi<FOLDERS_FINALE.length; fi++) {
+    const folder = FOLDERS_FINALE[fi];
+    const found  = fdItems.find(i=>i.name===folder.name&&i.kind==='directory');
+    if (!found) { finaleTabState.statuses.push({status:'miss',fileCount:0,folderPath:null}); continue; }
+    const folderPath = pathJoin(finaleTabState.fdPath, folder.name);
+    const fileCount  = await countFilesRecursive(folderPath);
+    finaleTabState.statuses.push({status:fileCount>0?'ok':'warn',fileCount,folderPath});
+  }
+}
+
+async function countFilesRecursive(dirPath) {
+  let count=0;
+  const items = await OMAV.fs.ls(dirPath);
+  for (const i of items) {
+    if (i.kind==='file') count++;
+    else if (i.kind==='directory') count += await countFilesRecursive(pathJoin(dirPath,i.name));
+  }
+  return count;
+}
+
+function renderFinaleTabsBar() {
+  const bar = document.getElementById('folderTabsBar');
+  bar.classList.add('visible');
+  bar.innerHTML = FOLDERS_FINALE.map((folder,i)=>{
+    const st=finaleTabState.statuses[i]||{status:'miss',fileCount:0};
+    const isActive=finaleTabState.activeFolderIdx===i;
+    const countBadge=st.status!=='miss'?`<span class="ftab-count">${st.fileCount}</span>`:'';
+    return `<button class="ftab status-${st.status}${isActive?' active':''}" onclick="selectFinaleTab(${i})" title="${folder.name}">
+      <div class="ftab-top"><span class="ftab-num-label">${FINALE_TAB_NUMS[i]}</span><span class="ftab-dot"></span>${countBadge}</div>
+      <span class="ftab-label">${FINALE_TAB_LABELS[i]}</span>
+    </button>`;
+  }).join('');
+}
+
+async function selectFinaleTab(idx) {
+  finaleTabState.activeFolderIdx=idx;
+  renderFinaleTabsBar();
+
+  const st=finaleTabState.statuses[idx];
+  const folder=FOLDERS_FINALE[idx];
+  const area=document.getElementById('finaleArea');
+  const detailBar=document.getElementById('folderDetailBar');
+
+  detailBar.style.display='flex';
+  document.getElementById('folderDetailName').textContent=folder.name;
+  document.getElementById('folderDetailCount').textContent=st.status!=='miss'?`${st.fileCount} file`:'';
+
+  const statusEl=document.getElementById('folderDetailStatus');
+  if(st.status==='ok'){statusEl.textContent='✓ Validato';statusEl.className='folder-detail-status fds-ok';}
+  else if(st.status==='warn'){statusEl.textContent='⚠ Vuoto — caricare documenti';statusEl.className='folder-detail-status fds-warn';}
+  else{statusEl.textContent='✗ Cartella mancante';statusEl.className='folder-detail-status fds-miss';}
+
+  if (!st.folderPath) {
+    area.innerHTML=`<div class="tree-empty"><div class="big">📂</div>Cartella <strong style="color:var(--accent2)">${folder.name}</strong> mancante.</div>`;
+    resetUpload();
+    return;
+  }
+
+  setUploadDir(st.folderPath, folder.name);
+
+  const folderItems=(await OMAV.fs.ls(st.folderPath)).sort((a,b)=>{
+    if(a.kind!==b.kind)return a.kind==='directory'?-1:1;
+    return a.name.localeCompare(b.name);
+  });
+  renderFinaleTree(st.folderPath, folder.name, folderItems, true);
+}
+
+// ═══════════════════════════════════════════════════════
+// TREE FINALE (con sottocartelle standard inline)
+// ═══════════════════════════════════════════════════════
+let _treeBreadcrumb = [];
+
+function renderFinaleTree(dirPath, dirName, items, isRoot=false) {
+  const area = document.getElementById('finaleArea');
+  if (isRoot) _treeBreadcrumb = [];
+
+  area.innerHTML = '';
+
+  if (!isRoot && _treeBreadcrumb.length > 0) {
+    const backRow = document.createElement('div');
+    backRow.className = 't-row clickable';
+    backRow.innerHTML = `<span class="t-connector"></span><span class="t-icon">⬆️</span><span class="t-name root">← Indietro</span>`;
+    backRow.addEventListener('click', async () => {
+      _treeBreadcrumb.pop();
+      if (_treeBreadcrumb.length > 0) {
+        const prev=_treeBreadcrumb[_treeBreadcrumb.length-1];
+        _treeBreadcrumb.pop();
+        const its=(await OMAV.fs.ls(prev.path)).sort((a,b)=>a.kind!==b.kind?a.kind==='directory'?-1:1:a.name.localeCompare(b.name));
+        renderFinaleTree(prev.path, prev.name, its);
+      } else {
+        await selectFinaleTab(finaleTabState.activeFolderIdx);
+      }
+    });
+    area.appendChild(backRow);
+  }
+
+  area.appendChild(makeTreeRow(0,'📁',dirName,'root',true,null,null,null));
+
+  if (!items.length) {
+    const empty=document.createElement('div');
+    empty.className='t-row';
+    empty.innerHTML='<span class="t-connector" style="padding-left:16px">└─</span><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">Cartella vuota</span>';
+    area.appendChild(empty);
+
+    // Warning cartelle standard mancanti
+    const folder = FOLDERS_FINALE[finaleTabState.activeFolderIdx];
+    if (isRoot && folder?.subs?.length) {
+      const warn=document.createElement('div');
+      warn.style.cssText='margin-top:12px;padding:9px 13px;background:rgba(232,85,85,.05);border:1px solid rgba(232,85,85,.2);border-radius:3px;font-family:var(--mono);font-size:11px;color:var(--red)';
+      warn.textContent=`⚠ ${folder.subs.length} sottocartelle standard mancanti`;
+      area.appendChild(warn);
+    }
+    return;
+  }
+
+  const folder = FOLDERS_FINALE[finaleTabState.activeFolderIdx];
+  const FOLDERS_REF = isRoot ? FOLDERS_FINALE : null;
+
+  for (let i=0; i<items.length; i++) {
+    const item=items[i];
+    const isLast=i===items.length-1;
+    const icon=item.kind==='directory'?'📁':fileIcon(item.name);
+    const childPath=item.kind==='directory'?pathJoin(dirPath,item.name):null;
+    const row=makeTreeRow(1,icon,item.name,item.kind==='directory'?'':'sub',isLast,childPath,dirPath,item.name);
+    area.appendChild(row);
+  }
+
+  // Mostra sottocartelle standard mancanti
+  if (isRoot && folder?.subs?.length) {
+    const existingNames=items.map(i=>i.name);
+    const missing=folder.subs.filter(s=>!existingNames.includes(s));
+    for (const s of missing) {
+      const row=document.createElement('div');
+      row.className='t-row';
+      row.innerHTML=`<span class="t-connector" style="padding-left:16px">├─</span><span class="t-icon">❌</span><span class="t-name sub" style="color:var(--red);text-decoration:line-through;opacity:.6">${esc(s)}</span><span class="t-tag tag-miss">MANCANTE</span>`;
+      area.appendChild(row);
+    }
+  }
+}
+
+function makeTreeRow(depth, icon, name, nameCls, isLast, childPath, parentPath, itemName) {
+  const row=document.createElement('div');
+  row.className='t-row'+(childPath?' clickable':'');
+  const conn=depth>0?(isLast?'└─':'├─'):'';
+  row.innerHTML=`
+    <span class="t-connector" style="padding-left:${depth*16}px">${conn}</span>
+    <span class="t-icon">${icon}</span>
+    <span class="t-name ${nameCls}">${esc(name)}</span>
+  `;
+  if (childPath) {
+    // Click: seleziona come destinazione upload
+    row.addEventListener('click', async () => {
+      setUploadDir(childPath, name);
+      _treeBreadcrumb.push({path:childPath,name});
+      const its=(await OMAV.fs.ls(childPath)).sort((a,b)=>a.kind!==b.kind?a.kind==='directory'?-1:1:a.name.localeCompare(b.name));
+      renderFinaleTree(childPath, name, its);
+    });
+    // Drop
+    row.addEventListener('dragover',e=>{e.preventDefault();row.classList.add('drop-target');});
+    row.addEventListener('dragleave',()=>row.classList.remove('drop-target'));
+    row.addEventListener('drop',e=>{e.preventDefault();row.classList.remove('drop-target');setUploadDir(childPath,name);uploadFilesSelected(e.dataTransfer.files);});
+  }
+  return row;
+}
+
+// ═══════════════════════════════════════════════════════
+// UPLOAD
+// ═══════════════════════════════════════════════════════
+function resetUpload() {
+  uploadState.dirPath=null; uploadState.dirName=''; uploadState.files=[];
+  document.getElementById('uploadTarget').textContent='— clicca una cartella —';
+  document.getElementById('uploadNoTarget').style.display='flex';
+  document.getElementById('uploadBody').style.display='none';
+}
+
+function setUploadDir(dirPath, dirName) {
+  uploadState.dirPath=dirPath; uploadState.dirName=dirName;
+  document.getElementById('uploadTarget').textContent=dirName;
+  document.getElementById('uploadNoTarget').style.display='none';
+  document.getElementById('uploadBody').style.display='flex';
+}
+
+function uploadFilesSelected(fileList) {
+  for(const f of fileList) if(!uploadState.files.find(x=>x.name===f.name&&x.size===f.size)) uploadState.files.push(f);
+  renderUploadQueue();
+  document.getElementById('uploadInput').value='';
+}
+
+function renderUploadQueue() {
+  const wrap=document.getElementById('uploadQueueWrap');
+  const queue=document.getElementById('uploadQueue');
+  const btn=document.getElementById('btnUploadGo');
+  if(!uploadState.files.length){wrap.style.display='none';btn.disabled=true;return;}
+  wrap.style.display='block';btn.disabled=false;
+  queue.innerHTML=uploadState.files.map((f,i)=>`
+    <div class="uq-row" id="uqr-${i}">
+      <span class="uq-icon">${fileIcon(f.name)}</span>
+      <span class="uq-name">${esc(f.name)}</span>
+      <span class="uq-size">${formatSize(f.size)}</span>
+      <span class="uq-status wait" id="uqst-${i}">—</span>
+      <button class="uq-del" onclick="uploadRemove(${i})">✕</button>
+    </div>`).join('');
+}
+
+function uploadRemove(idx){uploadState.files.splice(idx,1);renderUploadQueue();}
+function uploadClear(){uploadState.files=[];renderUploadQueue();document.getElementById('uploadInput').value='';}
+
+async function uploadExecute() {
+  if(!uploadState.dirPath||!uploadState.files.length) return;
+  const btn=document.getElementById('btnUploadGo');
+  btn.disabled=true;btn.textContent='⏳ Caricamento…';
+  let ok=0,fail=0;
+  for(let i=0;i<uploadState.files.length;i++){
+    const stEl=document.getElementById(`uqst-${i}`);
+    const buf=await uploadState.files[i].arrayBuffer();
+    const dest=pathJoin(uploadState.dirPath,uploadState.files[i].name);
+    const res=await OMAV.fs.writeBuffer(dest,buf);
+    if(res){if(stEl){stEl.textContent='✓';stEl.className='uq-status ok';}ok++;}
+    else{if(stEl){stEl.textContent='✗';stEl.className='uq-status err';}fail++;}
+  }
+  toast(fail?`${ok} caricati, ${fail} errori`:`✅ ${ok} file caricati`,fail?'warn':'ok');
+  btn.textContent='⬆ Carica file';btn.disabled=false;
+  uploadState.files=[];
+  setTimeout(renderUploadQueue,1500);
+  // Aggiorna status
+  const idx=finaleTabState.activeFolderIdx;
+  if(idx>=0){const st=finaleTabState.statuses[idx];if(st){st.fileCount+=ok;if(ok>0)st.status='ok';}renderFinaleTabsBar();}
+}
+
+// ═══════════════════════════════════════════════════════
+// WIZARD CREA STRUTTURA FD
+// ═══════════════════════════════════════════════════════
+function openWizardFinale() {
+  if(!S.active) return;
+  const fdName=`${S.active.code}_FD_r01`;
+  document.getElementById('wizTitle').textContent=`Nuova struttura Finale — ${S.active.code}`;
+  document.getElementById('wizPreviewName').textContent=fdName;
+  document.getElementById('wizFolderList').innerHTML=FOLDERS_FINALE.map(f=>
+    `<div>📁 ${esc(f.name)}${f.subs.length?'<br>'+f.subs.map(s=>`&nbsp;&nbsp;&nbsp;📁 ${esc(s)}`).join('<br>'):''}  </div>`
+  ).join('<hr style="border:none;border-top:1px solid var(--border);margin:4px 0">');
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeWizard(){document.getElementById('overlay').classList.remove('open');}
+
+async function generateStructureFinale() {
+  if(!S.active) return;
+  const btn=document.getElementById('btnWizOk');
+  btn.disabled=true;btn.textContent='⏳ Creazione…';
+  setStatus('Creazione struttura Finale…','warn');
+
+  const commessaPath=S.active.name;
+  const fdPath=pathJoin(commessaPath,`${S.active.code}_FD_r01`);
+  let created=0;
+
+  for(const folder of FOLDERS_FINALE){
+    const fp=pathJoin(fdPath,folder.name);
+    await OMAV.fs.mkdir(fp);created++;
+    for(const s of folder.subs){await OMAV.fs.mkdir(pathJoin(fp,s));created++;}
+  }
+
+  closeWizard();
+  toast(`✅ Struttura FD creata (${created} cartelle)`,'ok');
+  setStatus('Struttura Finale creata','ok');
+  btn.textContent='⚡ Crea struttura';btn.disabled=false;
+  await loadFinaleTab();
+}
+
+// ESC per chiudere wizard
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeWizard();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeWizard();});
+
+// Drag & drop sull'upload dropzone
+document.addEventListener('DOMContentLoaded',()=>{
+  const dz=document.getElementById('uploadDz');
+  if(!dz)return;
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-active');});
+  dz.addEventListener('dragleave',e=>{if(!dz.contains(e.relatedTarget))dz.classList.remove('drag-active');});
+  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-active');uploadFilesSelected(e.dataTransfer.files);});
+});
+
+</script>
+</body>
+</html>
